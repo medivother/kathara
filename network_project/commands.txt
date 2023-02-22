@@ -1,0 +1,10 @@
+
+ssh -NL 12345:200.0.2.1:22 myuser1@100.0.1.5
+
+
+# Run this to eliminate bind warning
+# ssh -4 -NL 12345:200.0.2.1:22 myuser1@100.0.1.5
+
+
+#open new terminal on pc1 using command kathara connect pc1
+ssh myuser2@localhost -p 12345

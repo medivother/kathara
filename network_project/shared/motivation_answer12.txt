@@ -1,0 +1,3 @@
+The router r4 is not blocking the connection because:
+1) we set a firewall rule to block tcp and udp between source 100.0.0.0 (100.0.0.2) and destination 200.0.2.1
+2) since we are connecting to s2 from pc1 via VPN, the packets sent by pc1 have source 100.0.0.0 (100.0.0.2) but destination 200.0.1.5 (see capture.pcap), so r4 doesn't block them. This happens because the VPN conncetion we set up works as follows: the two clients, pc1 and s2, are connected client-to-client by the server s1, which means that when pc1 sends packets to s2, it is indeed sendig them to s1 which then sends them to s2 (as we can see in prova.pcap). 

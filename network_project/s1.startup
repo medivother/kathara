@@ -1,0 +1,40 @@
+/etc/init.d/networking restart
+/etc/init.d/ssh restart
+
+# Create user and home directory
+useradd myuser1 -m
+
+# Set password for user
+echo -e 'ilovessh\nilovessh\n' | passwd myuser1
+
+
+# Create ssh folder 
+mkdir /home/myuser1/.ssh
+# Create authorized_keys file
+touch /home/myuser1/.ssh/authorized_keys
+
+# Set correct permissions
+chown myuser1:myuser1 /home/myuser1/.ssh
+chmod 700 /home/myuser1/.ssh
+chown myuser1:myuser1 /home/myuser1/.ssh/authorized_keys
+chmod 600 /home/myuser1/.ssh/authorized_keys
+
+
+while ! [ -e /shared/id_rsa.pub ]; do
+    echo Waiting for public key...
+    sleep 1
+done
+
+cat /shared/id_rsa.pub > /home/myuser1/.ssh/authorized_keys
+
+touch /shared/done
+
+# We have to manually create the tun interface for this kathara image
+mkdir -p /dev/net
+mknod /dev/net/tun c 10 200
+chmod 600 /dev/net/tun
+
+chmod 600 /root/myserver.key
+
+# Launch openvpn at startup
+openvpn /root/server.conf

@@ -1,0 +1,63 @@
+/etc/init.d/networking restart
+/etc/init.d/ssh restart
+
+
+#this works but could be dangerous
+#iptables -P INPUT DROP
+#iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+#iptables -A INPUT -p udp --dport 1194 -j ACCEPT 
+#iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p udp --dport 1194 -j ACCEPT
+iptables -A INPUT -i eth0 -m state --state NEW -j DROP
+
+# Create user and home directory
+useradd myuser2 -m
+
+# Set password for user
+echo -e 'ilovessh\nilovessh\n' | passwd myuser2
+
+# Create ssh folder 
+mkdir /home/myuser2/.ssh
+# Create authorized_keys file
+touch /home/myuser2/.ssh/authorized_keys
+
+# Set correct permissions
+chown myuser2:myuser2 /home/myuser2/.ssh
+chmod 700 /home/myuser2/.ssh
+chown myuser2:myuser2 /home/myuser2/.ssh/authorized_keys
+chmod 600 /home/myuser2/.ssh/authorized_keys
+
+
+while ! [ -e /shared/id_rsa.pub ]; do
+    echo Waiting for public key...
+    sleep 1
+done
+
+
+cat /shared/id_rsa.pub > /home/myuser2/.ssh/authorized_keys
+
+while ! [ -e /shared/done ]; do
+    echo Waiting for everyone to finish...
+    sleep 1
+done
+rm /shared/id_rsa.pub
+rm /shared/done
+
+
+
+
+
+# iptables -P INPUT DROP se messo sotto non blocca perchè? Ordine non cambia 
+# così anche il ping r8 -> s2 è bloccato
+
+
+# We have to manually create the tun interface for this kathara image
+mkdir -p /dev/net
+mknod /dev/net/tun c 10 200
+chmod 600 /dev/net/tun
+
+# Launch openvpn at startup
+openvpn /root/client.conf
